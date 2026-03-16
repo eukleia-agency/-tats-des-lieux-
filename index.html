@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -8,148 +9,124 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
-    --gold: #B8986A; --dark: #1A1A18; --dark-2: #242420; --dark-3: #2E2E29;
-    --cream: #F5F0E8; --cream-2: #EDE6D6; --text: #3A3A35; --text-light: #7A7A70;
-    --green: #4A7C59; --orange: #C4732A; --red: #B04040; --grey: #888880;
-    --border: rgba(184,152,106,0.2);
+    --gold:#B8986A;--dark:#1A1A18;--dark-2:#242420;--dark-3:#2E2E29;
+    --cream:#F5F0E8;--cream-2:#EDE6D6;--text:#3A3A35;--text-light:#7A7A70;
+    --green:#4A7C59;--orange:#C4732A;--red:#B04040;--grey:#888880;
+    --border:rgba(184,152,106,0.2);
   }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--cream); color:var(--text); font-family:'Jost',sans-serif; font-weight:300; min-height:100vh; }
-
-  /* HEADER */
-  header { background:var(--dark); padding:2rem 1.5rem 1.5rem; text-align:center; position:relative; }
-  header::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
-  .logo { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:300; color:var(--gold); letter-spacing:0.3em; text-transform:uppercase; }
-  .logo-sub { font-size:0.65rem; letter-spacing:0.25em; color:var(--text-light); text-transform:uppercase; margin-top:0.2rem; }
-  .header-divider { width:40px; height:1px; background:var(--gold); margin:1rem auto 0.8rem; opacity:0.5; }
-  .header-title { font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:300; color:var(--cream); letter-spacing:0.1em; }
-
-  /* SAVE INDICATOR */
-  .save-bar { background:var(--dark-3); padding:0.4rem 1.5rem; display:flex; align-items:center; justify-content:flex-end; gap:0.4rem; font-size:0.65rem; color:var(--text-light); letter-spacing:0.05em; }
-  .save-dot { width:6px; height:6px; border-radius:50%; background:var(--grey); transition:background 0.3s; }
-  .save-dot.saved { background:var(--green); }
-  .save-dot.saving { background:var(--orange); }
-
-  /* INFOS BIEN */
-  .infos-bien { background:var(--dark-2); padding:1.5rem; border-bottom:1px solid var(--border); }
-  .infos-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-  .infos-grid .full { grid-column:1/-1; }
-  .field-label { font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:0.4rem; }
-  .field-input { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(184,152,106,0.25); border-radius:3px; padding:0.6rem 0.8rem; color:var(--cream); font-family:'Jost',sans-serif; font-size:0.85rem; font-weight:300; outline:none; transition:border-color 0.2s; }
-  .field-input:focus { border-color:var(--gold); }
-  .field-input::placeholder { color:rgba(255,255,255,0.2); }
-
-  /* OPTIONS */
-  .options-bien { background:var(--dark-3); padding:1.2rem 1.5rem; border-bottom:1px solid var(--border); }
-  .options-title { font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:0.8rem; }
-  .options-grid { display:flex; flex-wrap:wrap; gap:0.5rem; }
-  .option-toggle { display:flex; align-items:center; gap:0.4rem; padding:0.4rem 0.8rem; border:1px solid rgba(184,152,106,0.25); border-radius:20px; cursor:pointer; font-size:0.75rem; color:var(--text-light); transition:all 0.2s; user-select:none; }
-  .option-toggle.active { border-color:var(--gold); color:var(--gold); background:rgba(184,152,106,0.08); }
-
-  /* SECTIONS */
-  .sections-container { padding:1.5rem; display:flex; flex-direction:column; gap:1rem; }
-  .section { background:white; border-radius:6px; overflow:hidden; box-shadow:0 1px 8px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.06); }
-  .section.optional { display:none; }
-  .section.optional.visible { display:block; }
-  .section-header { background:var(--dark); padding:0.9rem 1.2rem; display:flex; align-items:center; gap:0.7rem; cursor:pointer; user-select:none; }
-  .section-icon { font-size:1rem; }
-  .section-title { font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:400; color:var(--cream); letter-spacing:0.05em; flex:1; }
-  .section-count { font-size:0.6rem; background:rgba(184,152,106,0.2); color:var(--gold); padding:0.15rem 0.5rem; border-radius:10px; margin-right:0.3rem; }
-  .section-chevron { color:var(--gold); font-size:0.8rem; transition:transform 0.3s; }
-  .section-header.collapsed .section-chevron { transform:rotate(-90deg); }
-  .section-body.collapsed { display:none; }
-
-  /* DUPLICATE BTN */
-  .duplicate-btn { width:100%; padding:0.6rem; background:rgba(184,152,106,0.06); border:1px dashed rgba(184,152,106,0.3); border-radius:0; font-family:'Jost',sans-serif; font-size:0.72rem; color:var(--gold); cursor:pointer; letter-spacing:0.1em; transition:all 0.2s; }
-  .duplicate-btn:hover { background:rgba(184,152,106,0.12); }
-  .duplicated-section-header { background:var(--dark-3); padding:0.7rem 1.2rem; display:flex; align-items:center; gap:0.5rem; border-top:1px solid rgba(184,152,106,0.15); }
-  .duplicated-section-label { font-family:'Cormorant Garamond',serif; font-size:0.85rem; color:var(--gold); flex:1; font-style:italic; }
-  .remove-duplicate-btn { font-size:0.7rem; color:var(--text-light); background:none; border:none; cursor:pointer; padding:0.2rem 0.4rem; }
-
-  /* ITEMS */
-  .item { padding:0.9rem 1.2rem; border-bottom:1px solid rgba(0,0,0,0.05); transition:opacity 0.2s; }
-  .item:last-child { border-bottom:none; }
-  .item.absent-item { opacity:0.4; }
-  .item-name { font-size:0.85rem; color:var(--text); font-weight:400; margin-bottom:0.6rem; }
-  .item-status { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0.3rem; }
-  .status-btn { padding:0.4rem 0.15rem; border:1px solid; border-radius:4px; font-size:0.6rem; font-family:'Jost',sans-serif; cursor:pointer; text-align:center; transition:all 0.15s; background:transparent; font-weight:400; }
-  .status-btn.bon { border-color:rgba(74,124,89,0.3); color:var(--green); }
-  .status-btn.bon.active { background:var(--green); color:white; border-color:var(--green); }
-  .status-btn.surveiller { border-color:rgba(196,115,42,0.3); color:var(--orange); }
-  .status-btn.surveiller.active { background:var(--orange); color:white; border-color:var(--orange); }
-  .status-btn.traiter { border-color:rgba(176,64,64,0.3); color:var(--red); }
-  .status-btn.traiter.active { background:var(--red); color:white; border-color:var(--red); }
-  .status-btn.absent { border-color:rgba(136,136,128,0.3); color:var(--grey); }
-  .status-btn.absent.active { background:var(--grey); color:white; border-color:var(--grey); }
-  .item-extras { display:none; margin-top:0.6rem; gap:0.6rem; flex-direction:column; }
-  .item-extras.visible { display:flex; }
-  .item-comment { width:100%; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:0.5rem 0.7rem; font-family:'Jost',sans-serif; font-size:0.8rem; font-weight:300; color:var(--text); outline:none; resize:none; height:52px; transition:border-color 0.2s; }
-  .item-comment:focus { border-color:var(--gold); }
-
-  /* PHOTO */
-  .photo-area { display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
-  .photo-btn { display:inline-flex; align-items:center; gap:0.35rem; padding:0.35rem 0.7rem; border:1px solid rgba(184,152,106,0.3); border-radius:4px; font-size:0.7rem; color:var(--gold); cursor:pointer; background:transparent; font-family:'Jost',sans-serif; transition:all 0.2s; }
-  .photo-btn:hover { background:rgba(184,152,106,0.08); }
-  .photo-input { display:none; }
-  .photo-thumbs { display:flex; flex-wrap:wrap; gap:0.4rem; }
-  .photo-thumb { position:relative; width:52px; height:52px; border-radius:4px; overflow:hidden; border:1px solid var(--border); }
-  .photo-thumb img { width:100%; height:100%; object-fit:cover; }
-  .photo-remove { position:absolute; top:1px; right:1px; background:rgba(26,26,24,0.75); color:white; border:none; border-radius:50%; width:16px; height:16px; font-size:0.55rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-
-  /* OBSERVATIONS */
-  .observations-block { margin:0 1.5rem 1rem; background:white; border-radius:6px; overflow:hidden; box-shadow:0 1px 8px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.06); }
-  .observations-header { background:var(--dark); padding:0.9rem 1.2rem; display:flex; align-items:center; gap:0.7rem; }
-  .observations-body { padding:1rem 1.2rem; }
-  .observations-textarea { width:100%; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:0.7rem 0.8rem; font-family:'Jost',sans-serif; font-size:0.82rem; font-weight:300; color:var(--text); outline:none; resize:none; height:100px; transition:border-color 0.2s; }
-  .observations-textarea:focus { border-color:var(--gold); }
-
-  /* BUTTONS */
-  .action-buttons { margin:0 1.5rem 1.5rem; display:flex; gap:0.8rem; }
-  .recap-btn { flex:2; padding:1rem; background:var(--dark); color:var(--gold); border:1px solid var(--gold); border-radius:4px; font-family:'Cormorant Garamond',serif; font-size:1rem; letter-spacing:0.15em; cursor:pointer; transition:all 0.2s; }
-  .recap-btn:hover { background:var(--gold); color:var(--dark); }
-  .pdf-btn { flex:1; padding:1rem; background:transparent; color:var(--text-light); border:1px solid rgba(0,0,0,0.15); border-radius:4px; font-family:'Jost',sans-serif; font-size:0.75rem; letter-spacing:0.1em; cursor:pointer; transition:all 0.2s; }
-  .pdf-btn:hover { border-color:var(--gold); color:var(--gold); }
-  .reset-btn { padding:1rem 0.8rem; background:transparent; color:var(--text-light); border:1px solid rgba(0,0,0,0.1); border-radius:4px; font-family:'Jost',sans-serif; font-size:0.7rem; cursor:pointer; transition:all 0.2s; }
-  .reset-btn:hover { border-color:var(--red); color:var(--red); }
-
-  /* MODAL */
-  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(26,26,24,0.85); z-index:100; overflow-y:auto; padding:1.5rem; }
-  .modal-overlay.visible { display:flex; align-items:flex-start; justify-content:center; }
-  .modal { background:var(--cream); border-radius:8px; width:100%; max-width:600px; overflow:hidden; margin:auto; }
-  .modal-header { background:var(--dark); padding:1.5rem; text-align:center; position:relative; }
-  .modal-header::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
-  .modal-logo { font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:var(--gold); letter-spacing:0.3em; }
-  .modal-title { font-family:'Cormorant Garamond',serif; font-size:0.9rem; color:var(--cream-2); margin-top:0.3rem; letter-spacing:0.1em; font-style:italic; }
-  .modal-body { padding:1.5rem; max-height:70vh; overflow-y:auto; }
-  .recap-info { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem 1rem; padding-bottom:1rem; margin-bottom:1rem; border-bottom:1px solid var(--border); }
-  .recap-info-item { font-size:0.78rem; color:var(--text-light); }
-  .recap-info-item strong { display:block; color:var(--text); font-weight:500; }
-  .summary-counts { display:flex; gap:0.5rem; margin-bottom:1.2rem; }
-  .count-chip { flex:1; text-align:center; padding:0.6rem 0.2rem; border-radius:6px; font-size:1.1rem; font-family:'Cormorant Garamond',serif; }
-  .count-chip span { display:block; font-family:'Jost',sans-serif; font-size:0.52rem; letter-spacing:0.06em; text-transform:uppercase; margin-top:0.1rem; }
-  .chip-bon { background:rgba(74,124,89,0.1); color:var(--green); }
-  .chip-surveiller { background:rgba(196,115,42,0.1); color:var(--orange); }
-  .chip-traiter { background:rgba(176,64,64,0.1); color:var(--red); }
-  .chip-absent { background:rgba(136,136,128,0.1); color:var(--grey); }
-  .recap-section { margin-bottom:1rem; }
-  .recap-section-title { font-family:'Cormorant Garamond',serif; font-size:0.95rem; color:var(--dark); font-weight:500; border-bottom:1px solid var(--border); padding-bottom:0.3rem; margin-bottom:0.5rem; }
-  .recap-item { display:flex; align-items:flex-start; gap:0.5rem; font-size:0.8rem; margin-bottom:0.3rem; }
-  .recap-badge { font-size:0.6rem; padding:0.15rem 0.4rem; border-radius:10px; white-space:nowrap; font-weight:500; margin-top:0.05rem; }
-  .badge-bon { background:rgba(74,124,89,0.12); color:var(--green); }
-  .badge-surveiller { background:rgba(196,115,42,0.12); color:var(--orange); }
-  .badge-traiter { background:rgba(176,64,64,0.12); color:var(--red); }
-  .badge-absent { background:rgba(136,136,128,0.12); color:var(--grey); }
-  .recap-item-comment { font-size:0.72rem; color:var(--text-light); font-style:italic; margin-left:1.5rem; margin-bottom:0.4rem; }
-  .recap-photos { display:flex; flex-wrap:wrap; gap:0.3rem; margin-left:1.5rem; margin-bottom:0.5rem; }
-  .recap-photo-thumb { width:44px; height:44px; border-radius:3px; object-fit:cover; border:1px solid var(--border); }
-  .modal-actions { display:flex; gap:0.8rem; padding:1rem 1.5rem 1.5rem; }
-  .btn-copy { flex:1; padding:0.8rem; background:var(--dark); color:var(--gold); border:1px solid var(--gold); border-radius:4px; font-family:'Jost',sans-serif; font-size:0.78rem; letter-spacing:0.1em; cursor:pointer; transition:all 0.2s; }
-  .btn-copy:hover { background:var(--gold); color:var(--dark); }
-  .btn-pdf-modal { flex:1; padding:0.8rem; background:transparent; color:var(--text-light); border:1px solid rgba(0,0,0,0.15); border-radius:4px; font-family:'Jost',sans-serif; font-size:0.78rem; cursor:pointer; transition:all 0.2s; }
-  .btn-pdf-modal:hover { border-color:var(--gold); color:var(--gold); }
-  .btn-close { padding:0.8rem 1.2rem; background:transparent; color:var(--text-light); border:1px solid rgba(0,0,0,0.15); border-radius:4px; font-family:'Jost',sans-serif; font-size:0.78rem; cursor:pointer; }
-  .toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px); background:var(--dark); color:var(--gold); padding:0.7rem 1.5rem; border-radius:30px; font-size:0.8rem; letter-spacing:0.1em; border:1px solid var(--gold); transition:transform 0.3s; z-index:200; }
-  .toast.show { transform:translateX(-50%) translateY(0); }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--cream);color:var(--text);font-family:'Jost',sans-serif;font-weight:300;min-height:100vh;}
+  header{background:var(--dark);padding:2rem 1.5rem 1.5rem;text-align:center;position:relative;}
+  header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+  .logo{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--gold);letter-spacing:0.3em;text-transform:uppercase;}
+  .logo-sub{font-size:0.65rem;letter-spacing:0.25em;color:var(--text-light);text-transform:uppercase;margin-top:0.2rem;}
+  .header-divider{width:40px;height:1px;background:var(--gold);margin:1rem auto 0.8rem;opacity:0.5;}
+  .header-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;color:var(--cream);letter-spacing:0.1em;}
+  .save-bar{background:var(--dark-3);padding:0.4rem 1.5rem;display:flex;align-items:center;justify-content:flex-end;gap:0.4rem;font-size:0.65rem;color:var(--text-light);letter-spacing:0.05em;}
+  .save-dot{width:6px;height:6px;border-radius:50%;background:var(--grey);transition:background 0.3s;}
+  .save-dot.saved{background:var(--green);}
+  .save-dot.saving{background:var(--orange);}
+  .infos-bien{background:var(--dark-2);padding:1.5rem;border-bottom:1px solid var(--border);}
+  .infos-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .infos-grid .full{grid-column:1/-1;}
+  .field-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;}
+  .field-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(184,152,106,0.25);border-radius:3px;padding:0.6rem 0.8rem;color:var(--cream);font-family:'Jost',sans-serif;font-size:0.85rem;font-weight:300;outline:none;transition:border-color 0.2s;}
+  .field-input:focus{border-color:var(--gold);}
+  .field-input::placeholder{color:rgba(255,255,255,0.2);}
+  select.field-input option{background:var(--dark-2);color:var(--cream);}
+  .options-bien{background:var(--dark-3);padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);}
+  .options-title{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;}
+  .options-grid{display:flex;flex-wrap:wrap;gap:0.5rem;}
+  .option-toggle{display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border:1px solid rgba(184,152,106,0.25);border-radius:20px;cursor:pointer;font-size:0.75rem;color:var(--text-light);transition:all 0.2s;user-select:none;}
+  .option-toggle.active{border-color:var(--gold);color:var(--gold);background:rgba(184,152,106,0.08);}
+  .sections-container{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
+  .section{background:white;border-radius:6px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.06);}
+  .section.optional{display:none;}
+  .section.optional.visible{display:block;}
+  .section.hidden-type{display:none;}
+  .section-header{background:var(--dark);padding:0.9rem 1.2rem;display:flex;align-items:center;gap:0.7rem;cursor:pointer;user-select:none;}
+  .section-icon{font-size:1rem;}
+  .section-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--cream);letter-spacing:0.05em;flex:1;}
+  .section-chevron{color:var(--gold);font-size:0.8rem;transition:transform 0.3s;}
+  .section-header.collapsed .section-chevron{transform:rotate(-90deg);}
+  .section-body.collapsed{display:none;}
+  .duplicate-btn{width:100%;padding:0.6rem;background:rgba(184,152,106,0.06);border:1px dashed rgba(184,152,106,0.3);border-radius:0;font-family:'Jost',sans-serif;font-size:0.72rem;color:var(--gold);cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;}
+  .duplicate-btn:hover{background:rgba(184,152,106,0.12);}
+  .remove-duplicate-btn{font-size:0.7rem;color:var(--text-light);background:none;border:none;cursor:pointer;padding:0.2rem 0.4rem;}
+  .item{padding:0.9rem 1.2rem;border-bottom:1px solid rgba(0,0,0,0.05);transition:opacity 0.2s;}
+  .item:last-child{border-bottom:none;}
+  .item.absent-item{opacity:0.4;}
+  .item-name{font-size:0.85rem;color:var(--text);font-weight:400;margin-bottom:0.6rem;}
+  .item-status{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.3rem;}
+  .status-btn{padding:0.4rem 0.15rem;border:1px solid;border-radius:4px;font-size:0.6rem;font-family:'Jost',sans-serif;cursor:pointer;text-align:center;transition:all 0.15s;background:transparent;font-weight:400;}
+  .status-btn.bon{border-color:rgba(74,124,89,0.3);color:var(--green);}
+  .status-btn.bon.active{background:var(--green);color:white;border-color:var(--green);}
+  .status-btn.surveiller{border-color:rgba(196,115,42,0.3);color:var(--orange);}
+  .status-btn.surveiller.active{background:var(--orange);color:white;border-color:var(--orange);}
+  .status-btn.traiter{border-color:rgba(176,64,64,0.3);color:var(--red);}
+  .status-btn.traiter.active{background:var(--red);color:white;border-color:var(--red);}
+  .status-btn.absent{border-color:rgba(136,136,128,0.3);color:var(--grey);}
+  .status-btn.absent.active{background:var(--grey);color:white;border-color:var(--grey);}
+  .item-extras{display:none;margin-top:0.6rem;gap:0.6rem;flex-direction:column;}
+  .item-extras.visible{display:flex;}
+  .item-comment{width:100%;border:1px solid rgba(0,0,0,0.1);border-radius:4px;padding:0.5rem 0.7rem;font-family:'Jost',sans-serif;font-size:0.8rem;font-weight:300;color:var(--text);outline:none;resize:none;height:52px;transition:border-color 0.2s;}
+  .item-comment:focus{border-color:var(--gold);}
+  .photo-area{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
+  .photo-btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.35rem 0.7rem;border:1px solid rgba(184,152,106,0.3);border-radius:4px;font-size:0.7rem;color:var(--gold);cursor:pointer;background:transparent;font-family:'Jost',sans-serif;transition:all 0.2s;}
+  .photo-btn:hover{background:rgba(184,152,106,0.08);}
+  .photo-input{display:none;}
+  .photo-thumbs{display:flex;flex-wrap:wrap;gap:0.4rem;}
+  .photo-thumb{position:relative;width:52px;height:52px;border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;}
+  .photo-remove{position:absolute;top:1px;right:1px;background:rgba(26,26,24,0.75);color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:0.55rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .observations-block{margin:0 1.5rem 1rem;background:white;border-radius:6px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.06);}
+  .observations-header{background:var(--dark);padding:0.9rem 1.2rem;display:flex;align-items:center;gap:0.7rem;}
+  .observations-body{padding:1rem 1.2rem;}
+  .observations-textarea{width:100%;border:1px solid rgba(0,0,0,0.1);border-radius:4px;padding:0.7rem 0.8rem;font-family:'Jost',sans-serif;font-size:0.82rem;font-weight:300;color:var(--text);outline:none;resize:none;height:100px;transition:border-color 0.2s;}
+  .observations-textarea:focus{border-color:var(--gold);}
+  .action-buttons{margin:0 1.5rem 1.5rem;display:flex;gap:0.8rem;}
+  .recap-btn{flex:2;padding:1rem;background:var(--dark);color:var(--gold);border:1px solid var(--gold);border-radius:4px;font-family:'Cormorant Garamond',serif;font-size:1rem;letter-spacing:0.15em;cursor:pointer;transition:all 0.2s;}
+  .recap-btn:hover{background:var(--gold);color:var(--dark);}
+  .pdf-btn{flex:1;padding:1rem;background:transparent;color:var(--text-light);border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'Jost',sans-serif;font-size:0.75rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;}
+  .pdf-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .reset-btn{padding:1rem 0.8rem;background:transparent;color:var(--text-light);border:1px solid rgba(0,0,0,0.1);border-radius:4px;font-family:'Jost',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;}
+  .reset-btn:hover{border-color:var(--red);color:var(--red);}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,26,24,0.85);z-index:100;overflow-y:auto;padding:1.5rem;}
+  .modal-overlay.visible{display:flex;align-items:flex-start;justify-content:center;}
+  .modal{background:var(--cream);border-radius:8px;width:100%;max-width:600px;overflow:hidden;margin:auto;}
+  .modal-header{background:var(--dark);padding:1.5rem;text-align:center;position:relative;}
+  .modal-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+  .modal-logo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold);letter-spacing:0.3em;}
+  .modal-title{font-family:'Cormorant Garamond',serif;font-size:0.9rem;color:var(--cream-2);margin-top:0.3rem;letter-spacing:0.1em;font-style:italic;}
+  .modal-body{padding:1.5rem;max-height:70vh;overflow-y:auto;}
+  .recap-info{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1rem;padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--border);}
+  .recap-info-item{font-size:0.78rem;color:var(--text-light);}
+  .recap-info-item strong{display:block;color:var(--text);font-weight:500;}
+  .summary-counts{display:flex;gap:0.5rem;margin-bottom:1.2rem;}
+  .count-chip{flex:1;text-align:center;padding:0.6rem 0.2rem;border-radius:6px;font-size:1.1rem;font-family:'Cormorant Garamond',serif;}
+  .count-chip span{display:block;font-family:'Jost',sans-serif;font-size:0.52rem;letter-spacing:0.06em;text-transform:uppercase;margin-top:0.1rem;}
+  .chip-bon{background:rgba(74,124,89,0.1);color:var(--green);}
+  .chip-surveiller{background:rgba(196,115,42,0.1);color:var(--orange);}
+  .chip-traiter{background:rgba(176,64,64,0.1);color:var(--red);}
+  .chip-absent{background:rgba(136,136,128,0.1);color:var(--grey);}
+  .recap-section{margin-bottom:1rem;}
+  .recap-section-title{font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--dark);font-weight:500;border-bottom:1px solid var(--border);padding-bottom:0.3rem;margin-bottom:0.5rem;}
+  .recap-item{display:flex;align-items:flex-start;gap:0.5rem;font-size:0.8rem;margin-bottom:0.3rem;}
+  .recap-badge{font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:10px;white-space:nowrap;font-weight:500;margin-top:0.05rem;}
+  .badge-bon{background:rgba(74,124,89,0.12);color:var(--green);}
+  .badge-surveiller{background:rgba(196,115,42,0.12);color:var(--orange);}
+  .badge-traiter{background:rgba(176,64,64,0.12);color:var(--red);}
+  .recap-item-comment{font-size:0.72rem;color:var(--text-light);font-style:italic;margin-left:1.5rem;margin-bottom:0.4rem;}
+  .recap-photos{display:flex;flex-wrap:wrap;gap:0.3rem;margin-left:1.5rem;margin-bottom:0.5rem;}
+  .recap-photo-thumb{width:44px;height:44px;border-radius:3px;object-fit:cover;border:1px solid var(--border);}
+  .modal-actions{display:flex;gap:0.8rem;padding:1rem 1.5rem 1.5rem;}
+  .btn-copy{flex:1;padding:0.8rem;background:var(--dark);color:var(--gold);border:1px solid var(--gold);border-radius:4px;font-family:'Jost',sans-serif;font-size:0.78rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;}
+  .btn-copy:hover{background:var(--gold);color:var(--dark);}
+  .btn-pdf-modal{flex:1;padding:0.8rem;background:transparent;color:var(--text-light);border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'Jost',sans-serif;font-size:0.78rem;cursor:pointer;transition:all 0.2s;}
+  .btn-pdf-modal:hover{border-color:var(--gold);color:var(--gold);}
+  .btn-close{padding:0.8rem 1.2rem;background:transparent;color:var(--text-light);border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'Jost',sans-serif;font-size:0.78rem;cursor:pointer;}
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--dark);color:var(--gold);padding:0.7rem 1.5rem;border-radius:30px;font-size:0.8rem;letter-spacing:0.1em;border:1px solid var(--gold);transition:transform 0.3s;z-index:200;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -171,7 +148,23 @@
     <div class="full"><div class="field-label">Propriétaire</div><input class="field-input" id="proprietaire" type="text" placeholder="Nom du propriétaire" oninput="scheduleSave()"></div>
     <div class="full"><div class="field-label">Adresse</div><input class="field-input" id="adresse" type="text" placeholder="Adresse complète du bien" oninput="scheduleSave()"></div>
     <div><div class="field-label">Date</div><input class="field-input" id="date" type="date" oninput="scheduleSave()"></div>
-    <div><div class="field-label">Type de bien</div><input class="field-input" id="type-bien" type="text" placeholder="Ex : Appartement T3" oninput="scheduleSave()"></div>
+    <div>
+      <div class="field-label">Type de bien</div>
+      <select class="field-input" id="type-bien" onchange="onTypeBienChange();scheduleSave()">
+        <option value="">— Sélectionner —</option>
+        <option value="Studio">Studio</option>
+        <option value="Appartement">Appartement</option>
+        <option value="Duplex">Duplex</option>
+        <option value="Loft">Loft</option>
+        <option value="Penthouse">Penthouse</option>
+        <option value="Maison">Maison</option>
+        <option value="Villa">Villa</option>
+        <option value="Chalet">Chalet</option>
+        <option value="Mas / Bastide">Mas / Bastide</option>
+        <option value="Manoir">Manoir</option>
+      </select>
+    </div>
+    <div><div class="field-label">Nb. de pièces</div><input class="field-input" id="nb-pieces" type="text" placeholder="Ex : T3, T5…" oninput="scheduleSave()"></div>
     <div><div class="field-label">Référence Eukleia</div><input class="field-input" id="reference" type="text" placeholder="Ref. interne" oninput="scheduleSave()"></div>
     <div><div class="field-label">Étage / Situation</div><input class="field-input" id="etage" type="text" placeholder="Ex : 4e étage, vue mer" oninput="scheduleSave()"></div>
   </div>
@@ -181,15 +174,18 @@
   <div class="options-title">Prestations optionnelles présentes</div>
   <div class="options-grid">
     <div class="option-toggle" data-section="piscine" onclick="toggleOption(this)">🏊 Piscine</div>
+    <div class="option-toggle" data-section="bainremous" onclick="toggleOption(this)">🛁 Bain à remous</div>
     <div class="option-toggle" data-section="jacuzzi" onclick="toggleOption(this)">♨️ Jacuzzi / Sauna</div>
     <div class="option-toggle" data-section="jardin" onclick="toggleOption(this)">🌳 Jardin</div>
     <div class="option-toggle" data-section="homecinema" onclick="toggleOption(this)">🎬 Home cinéma</div>
+    <div class="option-toggle" data-section="sallejeux" onclick="toggleOption(this)">🎱 Salle de jeux</div>
+    <div class="option-toggle" data-section="sport" onclick="toggleOption(this)">🎾 Terrain de sport</div>
     <div class="option-toggle" data-section="garage" onclick="toggleOption(this)">🚗 Garage / Parking</div>
   </div>
 </div>
 
 <div class="sections-container" id="sections-container">
-  <div class="section" data-section="exterieur"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🏠</span><span class="section-title">Extérieur & Accès</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
+  <div class="section type-collective" data-section="exterieur"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🏠</span><span class="section-title">Extérieur & Accès</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section" data-section="terrasse"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🌿</span><span class="section-title">Terrasse / Balcon</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section" data-section="vie"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🛋️</span><span class="section-title">Espace de vie</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section" data-section="cuisine"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🍳</span><span class="section-title">Cuisine & Équipements</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
@@ -197,24 +193,22 @@
   <div class="section duplicable" data-section="sdb"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🚿</span><span class="section-title">Salle de bain 1</span><span class="section-chevron">▾</span></div><div class="section-body"></div><button class="duplicate-btn" onclick="duplicateSection(this,'sdb')">+ Ajouter une salle de bain</button></div>
   <div class="section" data-section="wc"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🚽</span><span class="section-title">WC</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section" data-section="equipements"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">📡</span><span class="section-title">Équipements généraux</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
+  <div class="section" data-section="divertissement"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🎮</span><span class="section-title">Divertissement & Loisirs</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section" data-section="linge"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🧺</span><span class="section-title">Linge & Entretien</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section" data-section="securite"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🔒</span><span class="section-title">Sécurité</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section optional" data-section="jardin"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🌳</span><span class="section-title">Jardin</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section optional" data-section="piscine"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🏊</span><span class="section-title">Piscine</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
+  <div class="section optional" data-section="bainremous"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🛁</span><span class="section-title">Bain à remous</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section optional" data-section="jacuzzi"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">♨️</span><span class="section-title">Jacuzzi / Sauna</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section optional" data-section="homecinema"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🎬</span><span class="section-title">Home Cinéma</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
+  <div class="section optional" data-section="sallejeux"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🎱</span><span class="section-title">Salle de jeux</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
+  <div class="section optional" data-section="sport"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🎾</span><span class="section-title">Terrain de sport</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
   <div class="section optional" data-section="garage"><div class="section-header" onclick="toggleSection(this)"><span class="section-icon">🚗</span><span class="section-title">Garage / Parking privatif</span><span class="section-chevron">▾</span></div><div class="section-body"></div></div>
 </div>
 
-<!-- OBSERVATIONS GÉNÉRALES -->
 <div class="observations-block">
-  <div class="observations-header">
-    <span class="section-icon">📝</span>
-    <span class="section-title">Observations générales</span>
-  </div>
-  <div class="observations-body">
-    <textarea class="observations-textarea" id="observations" placeholder="Impression générale, remarques libres, points ne rentrant dans aucune catégorie…" oninput="scheduleSave()"></textarea>
-  </div>
+  <div class="observations-header"><span class="section-icon">📝</span><span class="section-title">Observations générales</span></div>
+  <div class="observations-body"><textarea class="observations-textarea" id="observations" placeholder="Impression générale, remarques libres…" oninput="scheduleSave()"></textarea></div>
 </div>
 
 <div class="action-buttons">
@@ -223,13 +217,9 @@
   <button class="reset-btn" onclick="resetForm()" title="Réinitialiser">↺</button>
 </div>
 
-<!-- MODAL RECAP -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-logo">Eukleia</div>
-      <div class="modal-title">Rapport d'état des lieux</div>
-    </div>
+    <div class="modal-header"><div class="modal-logo">Eukleia</div><div class="modal-title">Rapport d'état des lieux</div></div>
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-actions">
       <button class="btn-copy" onclick="copyRecap()">COPIER</button>
@@ -242,499 +232,497 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// Types collectifs (résidence) vs individuels (maison/villa)
+const COLLECTIVE_TYPES = ['Studio','Appartement','Duplex','Loft','Penthouse'];
+
 const SECTIONS_DATA = {
-  exterieur: ["Façade & entrée de l'immeuble","Digicode / interphone / visiophone","Boîte aux lettres","Ascenseur (état & propreté)","Couloirs & parties communes","Éclairage communs","Parking / stationnement","Local poubelles","Local vélos"],
-  terrasse: ["Sol (propreté, état des dalles)","Mobilier de terrasse (table, chaises, bains de soleil)","Parasol / tonnelle","Plantes & jardinières","Éclairage extérieur","Volet(s) roulant(s)","Store banne / pergola","Pic à pigeons / protection oiseaux","Robinet d'arrosage extérieur","Barbecue / plancha"],
-  vie: ["Canapé(s) & fauteuils","Table basse","Table à manger","Chaises & assises","Buffet / meuble TV","Bibliothèque / étagères","Luminaires & lampes","Miroir(s)","Décoration & objets","Rideaux & voilages","Stores / occultants","Sols (parquet, carrelage, moquette)","Murs & peintures","Fenêtres, vitres & joints","Volets intérieurs","Prises & interrupteurs"],
-  cuisine: ["Four","Micro-ondes","Plaques de cuisson","Hotte aspirante","Réfrigérateur (état extérieur)","Réfrigérateur (intérieur & propreté)","Porte du réfrigérateur (joint, ouverture)","Congélateur","Lave-vaisselle","Plan de travail","Évier & robinetterie","Meubles cuisine (portes, tiroirs)","Casseroles & poêles","Couverts complets","Vaisselle (assiettes, bols, plats)","Verres & tasses","Couteaux & planche à découper","Ustensiles (spatules, louche, passoire, économe…)","Set de table / napperons","Théière","Cafetière / Nespresso (+ conteneur)","Bouilloire","Grille-pain","Papier absorbant & essuie-tout","Produits ménagers de base","Poubelle (+ sacs)"],
-  chambre: ["Matelas (état, propreté)","Sommier / cadre de lit","Oreillers","Couverture(s) / couette(s)","Draps & housses de couette","Protège-matelas","Armoire / penderie (portes, rangements)","Table(s) de chevet","Lampe(s) de chevet","Commode / tiroirs","Miroir","Cintres (nombre suffisant)","Fenêtres & volets / occultants","Sols & murs","Prises & interrupteurs","Coffre-fort (si présent)"],
-  sdb: ["Douche (paroi / parclose)","Receveur de douche","Joints de douche","Robinetterie douche","Douchette & flexible","Baignoire (état général)","Joints de baignoire","Robinetterie baignoire","Accroche douchette baignoire","Vasque & lavabo","Robinetterie vasque","Miroir","Rangements & meubles SDB","Porte-serviettes","Serviettes de bain","Serviettes de main","Tapis de bain","Distributeur savon mains","Gel douche / shampoing / après-shampoing","Sèche-cheveux","Sèche-serviettes","Ventilation / VMC","Sols & murs (carrelage, joints)"],
-  wc: ["Cuvette (état général)","Chasse d'eau (mécanisme)","Lunette & abattant","Porte-papier toilette","Papier toilette (stock)","Brosse WC & support","Poubelle","Ventilation","Propreté générale"],
-  equipements: ["Box Internet / routeur WiFi","Télévision(s) (état & fonctionnement)","Télécommandes (piles)","Lecteur / système streaming","Système audio / enceintes","Climatisation (filtres, télécommande)","Chauffage (radiateurs, programmation)","Volets roulants motorisés","Interphone / digicode intérieur","Prises & multiprises","Ampoules (toutes fonctionnelles)"],
-  linge: ["Machine à laver","Sèche-linge","Fer à repasser","Table à repasser","Produit lessive","Stock de sacs poubelle","Balai & pelle","Aspirateur","Serpillière & seau","Produits d'entretien ménager"],
-  securite: ["Détecteur de fumée (test)","Détecteur CO (si présent)","Extincteur (date de validité)","Trousse de secours","Serrures & verrous (portes & fenêtres)","Clés (inventaire complet)","Badges / cartes d'accès","Plan d'évacuation (si résidence)"],
-  jardin: ["Pelouse (état, tonte)","Haies & arbustes","Massifs floraux","Arrosage automatique","Tuyau d'arrosage & accessoires","Mobilier de jardin","Éclairage extérieur","Portail / clôture / barrière","Abri de jardin","Outillage jardin mis à disposition"],
-  piscine: ["Propreté & couleur de l'eau","Système de filtration & pompe","Traitement de l'eau (pH, chlore)","Bâche de protection / sécurité","Éclairage piscine","Épuisette & balai de fond","Robot nettoyeur","Plages & margelles (état)","Échelle / marches d'accès","Douche de piscine","Transats & mobilier"],
-  jacuzzi: ["État général du jacuzzi / spa","Propreté de l'eau","Système de filtration & jets","Contrôle de température","Couvercle / bâche isolante","Éclairage jacuzzi","État général du sauna","Poêle / résistance sauna","Pierres de sauna","Seau & louche sauna","Sablier & thermomètre sauna"],
-  homecinema: ["Écran / vidéoprojecteur","Toile de projection (si présente)","Système audio (ampli, enceintes)","Lecteur Blu-ray / Apple TV / console","Câblage & connectique (HDMI, etc.)","Télécommandes (piles)","Sièges / canapé salle","Occultation / volets noirs","Éclairage d'ambiance"],
-  garage: ["Porte de garage (motorisation & télécommande)","Sol & propreté","Éclairage","Rangements disponibles","Prises électriques","Vélos mis à disposition","Trottinettes / équipements loisirs","Espace de stockage propriétaire"]
+  exterieur:["Façade & entrée de l'immeuble","Digicode / interphone / visiophone","Boîte aux lettres","Ascenseur (état & propreté)","Couloirs & parties communes","Éclairage communs","Parking / stationnement","Local poubelles","Local vélos"],
+  terrasse:["Sol (propreté, état des dalles)","Mobilier de terrasse (table, chaises, bains de soleil)","Parasol / tonnelle","Plantes & jardinières","Éclairage extérieur","Volet(s) roulant(s)","Store banne / pergola","Pic à pigeons / protection oiseaux","Robinet d'arrosage extérieur","Barbecue / plancha"],
+  vie:["Canapé(s) & fauteuils","Table basse","Table à manger","Chaises & assises","Buffet / meuble TV","Bibliothèque / étagères","Luminaires & lampes","Miroir(s)","Décoration & objets","Rideaux & voilages","Stores / occultants","Sols (parquet, carrelage, moquette)","Murs & peintures","Fenêtres, vitres & joints","Volets intérieurs","Prises & interrupteurs"],
+  cuisine:["Four","Micro-ondes","Plaques de cuisson","Hotte aspirante","Réfrigérateur (état extérieur)","Réfrigérateur (intérieur & propreté)","Porte du réfrigérateur (joint, ouverture)","Congélateur","Lave-vaisselle","Plan de travail","Évier & robinetterie","Meubles cuisine (portes, tiroirs)","Casseroles & poêles","Couverts complets","Vaisselle (assiettes, bols, plats)","Verres & tasses","Couteaux & planche à découper","Ustensiles (spatules, louche, passoire, économe…)","Set de table / napperons","Théière","Cafetière / Nespresso (+ conteneur)","Bouilloire","Grille-pain","Papier absorbant & essuie-tout","Produits ménagers de base","Poubelle (+ sacs)"],
+  chambre:["Matelas (état, propreté)","Sommier / cadre de lit","Oreillers","Couverture(s) / couette(s)","Draps & housses de couette","Protège-matelas","Armoire / penderie (portes, rangements)","Table(s) de chevet","Lampe(s) de chevet","Commode / tiroirs","Miroir","Cintres (nombre suffisant)","Fenêtres & volets / occultants","Sols & murs","Prises & interrupteurs","Coffre-fort (si présent)"],
+  sdb:["Douche (paroi / parclose)","Receveur de douche","Joints de douche","Robinetterie douche","Douchette & flexible","Baignoire (état général)","Joints de baignoire","Robinetterie baignoire","Accroche douchette baignoire","Vasque & lavabo","Robinetterie vasque","Miroir","Rangements & meubles SDB","Porte-serviettes","Serviettes de bain","Serviettes de main","Tapis de bain","Distributeur savon mains","Distributeur gel douche","Distributeur shampoing / après-shampoing","Sèche-cheveux","Sèche-serviettes","Ventilation / VMC","Sols & murs (carrelage, joints)"],
+  wc:["Cuvette (état général)","Chasse d'eau (mécanisme)","Lunette & abattant","Porte-papier toilette","Papier toilette (stock)","Brosse WC & support","Poubelle","Ventilation","Propreté générale"],
+  equipements:["Box Internet / routeur WiFi","Télévision(s) (état & fonctionnement)","Télécommandes (piles)","Lecteur / système streaming","Système audio / enceintes","Climatisation (filtres, télécommande)","Chauffage (radiateurs, programmation)","Volets roulants motorisés","Interphone / digicode intérieur","Prises & multiprises","Ampoules (toutes fonctionnelles)","Projecteur / vidéoprojecteur"],
+  divertissement:["Console de jeux (état & accessoires)","Jeux de société (inventaire)","Livres & magazines","Vélos mis à disposition","Trottinettes électriques","Équipements plage (parasol, chaises, serviettes)"],
+  linge:["Machine à laver","Sèche-linge","Fer à repasser","Table à repasser","Produit lessive","Stock de sacs poubelle","Balai & pelle","Aspirateur","Serpillière & seau","Produits d'entretien ménager"],
+  securite:["Détecteur de fumée (test)","Détecteur CO (si présent)","Extincteur (date de validité)","Trousse de secours","Serrures & verrous (portes & fenêtres)","Clés (inventaire complet)","Badges / cartes d'accès","Plan d'évacuation (si résidence)"],
+  jardin:["Pelouse (état, tonte)","Haies & arbustes","Massifs floraux","Arrosage automatique","Tuyau d'arrosage & accessoires","Mobilier de jardin","Éclairage extérieur","Portail / clôture / barrière","Abri de jardin","Terrain de pétanque (état, boules)","Outillage jardin mis à disposition"],
+  piscine:["Propreté & couleur de l'eau","Système de filtration & pompe","Traitement de l'eau (pH, chlore)","Bâche de protection / sécurité","Éclairage piscine","Épuisette & balai de fond","Robot nettoyeur","Plages & margelles (état)","Échelle / marches d'accès","Douche de piscine","Transats & mobilier"],
+  bainremous:["État général de la cuve","Propreté de l'eau","Jets & système de filtration","Contrôle de température","Couvercle / bâche isolante","Éclairage","Produits de traitement de l'eau"],
+  jacuzzi:["État général du jacuzzi / spa","Propreté de l'eau","Système de filtration & jets","Contrôle de température","Couvercle / bâche isolante","Éclairage jacuzzi","État général du sauna","Poêle / résistance sauna","Pierres de sauna","Seau & louche sauna","Sablier & thermomètre sauna"],
+  homecinema:["Écran / vidéoprojecteur","Toile de projection (si présente)","Système audio (ampli, enceintes)","Lecteur Blu-ray / Apple TV / console","Câblage & connectique (HDMI, etc.)","Télécommandes (piles)","Sièges / canapé salle","Occultation / volets noirs","Éclairage d'ambiance"],
+  sallejeux:["Table de billard (état, accessoires)","Table de ping-pong (état, accessoires)","Baby-foot (état)","Fléchettes / cible","Jeux d'arcade (si présents)","Éclairage","Sol & murs"],
+  sport:["Terrain de tennis / paddle (état du sol)","Filet (état & tension)","Éclairage terrain","Raquettes & balles mis à disposition","Terrain de pétanque (état, boules)","Vestiaire / douche extérieure"],
+  garage:["Porte de garage (motorisation & télécommande)","Sol & propreté","Éclairage","Rangements disponibles","Prises électriques","Espace de stockage propriétaire"]
 };
 
-const STATUS_LABELS = { bon:'✓ Bon état', surveiller:'⚠ À surveiller', traiter:'✗ À traiter', absent:'— Absent' };
-const photoStore = {}; // itemId -> [dataURL, ...]
-let saveTimer = null;
-let itemCounter = 0;
-let duplicateCounts = { chambre: 1, sdb: 1 };
+const STATUS_LABELS={bon:'✓ Bon état',surveiller:'⚠ À surveiller',traiter:'✗ À traiter',absent:'— Absent'};
+const photoStore={};
+let saveTimer=null;
+let itemCounter=0;
+let duplicateCounts={chambre:1,sdb:1};
 
-// ── ITEM RENDERING ──
-function renderItem(itemName, sectionKey) {
-  const id = 'item-' + (++itemCounter);
-  photoStore[id] = [];
-  return `
-    <div class="item" data-item-id="${id}">
-      <div class="item-name">${itemName}</div>
-      <div class="item-status">
-        <button class="status-btn bon" onclick="setStatus(this,'bon')">✓ Bon</button>
-        <button class="status-btn surveiller" onclick="setStatus(this,'surveiller')">⚠ Surveiller</button>
-        <button class="status-btn traiter" onclick="setStatus(this,'traiter')">✗ Traiter</button>
-        <button class="status-btn absent" onclick="setStatus(this,'absent')">— Absent</button>
-      </div>
-      <div class="item-extras">
-        <textarea class="item-comment" placeholder="Commentaire…" oninput="scheduleSave()"></textarea>
-        <div class="photo-area">
-          <button class="photo-btn" onclick="triggerPhoto('${id}')">📷 Photo</button>
-          <input type="file" class="photo-input" id="photo-input-${id}" accept="image/*" multiple onchange="handlePhotos(this,'${id}')">
-          <div class="photo-thumbs" id="thumbs-${id}"></div>
-        </div>
-      </div>
-    </div>`;
-}
-
-function initSections() {
-  document.querySelectorAll('.section').forEach(section => {
-    const key = section.dataset.section;
-    const items = SECTIONS_DATA[key] || [];
-    const body = section.querySelector('.section-body');
-    if (body) body.innerHTML = items.map(item => renderItem(item, key)).join('');
-  });
-}
-
-// ── STATUS ──
-function setStatus(btn, status) {
-  const item = btn.closest('.item');
-  item.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const extras = item.querySelector('.item-extras');
-  if (status === 'surveiller' || status === 'traiter') {
-    extras.classList.add('visible');
-  } else {
-    extras.classList.remove('visible');
-    item.querySelector('.item-comment').value = '';
-  }
-  item.classList.toggle('absent-item', status === 'absent');
-  scheduleSave();
-}
-
-// ── PHOTOS ──
-function triggerPhoto(id) {
-  document.getElementById('photo-input-' + id).click();
-}
-
-function handlePhotos(input, id) {
-  const files = Array.from(input.files);
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      photoStore[id] = photoStore[id] || [];
-      const idx = photoStore[id].length;
-      photoStore[id].push(e.target.result);
-      const thumbs = document.getElementById('thumbs-' + id);
-      const div = document.createElement('div');
-      div.className = 'photo-thumb';
-      div.innerHTML = `<img src="${e.target.result}"><button class="photo-remove" onclick="removePhoto('${id}',${idx},this)">✕</button>`;
-      thumbs.appendChild(div);
-      scheduleSave();
-    };
-    reader.readAsDataURL(file);
-  });
-  input.value = '';
-}
-
-function removePhoto(id, idx, btn) {
-  photoStore[id].splice(idx, 1);
-  btn.closest('.photo-thumb').remove();
-  // re-index buttons
-  const thumbs = document.getElementById('thumbs-' + id);
-  thumbs.querySelectorAll('.photo-remove').forEach((b, i) => {
-    b.setAttribute('onclick', `removePhoto('${id}',${i},this)`);
-  });
-  scheduleSave();
-}
-
-// ── DUPLICATE SECTIONS ──
-function duplicateSection(btn, sectionKey) {
-  duplicateCounts[sectionKey]++;
-  const n = duplicateCounts[sectionKey];
-  const label = sectionKey === 'chambre' ? `Chambre ${n}` : `Salle de bain ${n}`;
-  const icon = sectionKey === 'chambre' ? '🛏️' : '🚿';
-  const items = SECTIONS_DATA[sectionKey] || [];
-
-  const wrapper = document.createElement('div');
-  wrapper.className = 'section';
-  wrapper.dataset.section = sectionKey + '-' + n;
-  wrapper.innerHTML = `
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-icon">${icon}</span>
-      <span class="section-title">${label}</span>
-      <button class="remove-duplicate-btn" onclick="removeDuplicate(this,event)" title="Supprimer">✕</button>
-      <span class="section-chevron">▾</span>
+function renderItem(itemName){
+  const id='item-'+(++itemCounter);
+  photoStore[id]=[];
+  return `<div class="item" data-item-id="${id}">
+    <div class="item-name">${itemName}</div>
+    <div class="item-status">
+      <button class="status-btn bon" onclick="setStatus(this,'bon')">✓ Bon</button>
+      <button class="status-btn surveiller" onclick="setStatus(this,'surveiller')">⚠ Surveiller</button>
+      <button class="status-btn traiter" onclick="setStatus(this,'traiter')">✗ Traiter</button>
+      <button class="status-btn absent" onclick="setStatus(this,'absent')">— Absent</button>
     </div>
-    <div class="section-body">${items.map(item => renderItem(item, sectionKey)).join('')}</div>`;
+    <div class="item-extras">
+      <textarea class="item-comment" placeholder="Commentaire…" oninput="scheduleSave()"></textarea>
 
-  // insert before original duplicate btn's parent
-  const originalSection = btn.closest('.section');
-  originalSection.parentNode.insertBefore(wrapper, originalSection.nextSibling);
+```
+  <div class="photo-area">
+    <button class="photo-btn" onclick="triggerPhoto('${id}')">📷 Photo</button>
+    <input type="file" class="photo-input" id="photo-input-${id}" accept="image/*" multiple onchange="handlePhotos(this,'${id}')">
+    <div class="photo-thumbs" id="thumbs-${id}"></div>
+  </div>
+</div>
+```
 
-  // update original section title
-  originalSection.querySelector('.section-title').textContent = sectionKey === 'chambre' ? 'Chambre 1' : 'Salle de bain 1';
+  </div>`;
+}
+
+function initSections(){
+document.querySelectorAll(’.section’).forEach(section=>{
+const key=section.dataset.section;
+const items=SECTIONS_DATA[key]||[];
+const body=section.querySelector(’.section-body’);
+if(body) body.innerHTML=items.map(item=>renderItem(item)).join(’’);
+});
+}
+
+function onTypeBienChange(){
+const val=document.getElementById(‘type-bien’).value;
+const extSection=document.querySelector(’.section[data-section=“exterieur”]’);
+if(!extSection) return;
+if(COLLECTIVE_TYPES.includes(val)){
+extSection.classList.remove(‘hidden-type’);
+} else if(val){
+extSection.classList.add(‘hidden-type’);
+}
+}
+
+function setStatus(btn,status){
+const item=btn.closest(’.item’);
+item.querySelectorAll(’.status-btn’).forEach(b=>b.classList.remove(‘active’));
+btn.classList.add(‘active’);
+const extras=item.querySelector(’.item-extras’);
+if(status===‘surveiller’||status===‘traiter’){
+extras.classList.add(‘visible’);
+} else {
+extras.classList.remove(‘visible’);
+item.querySelector(’.item-comment’).value=’’;
+}
+item.classList.toggle(‘absent-item’,status===‘absent’);
+scheduleSave();
+}
+
+function triggerPhoto(id){document.getElementById(‘photo-input-’+id).click();}
+
+function handlePhotos(input,id){
+Array.from(input.files).forEach(file=>{
+const reader=new FileReader();
+reader.onload=e=>{
+photoStore[id]=photoStore[id]||[];
+const idx=photoStore[id].length;
+photoStore[id].push(e.target.result);
+const thumbs=document.getElementById(‘thumbs-’+id);
+const div=document.createElement(‘div’);
+div.className=‘photo-thumb’;
+div.innerHTML=`<img src="${e.target.result}"><button class="photo-remove" onclick="removePhoto('${id}',${idx},this)">✕</button>`;
+thumbs.appendChild(div);
+scheduleSave();
+};
+reader.readAsDataURL(file);
+});
+input.value=’’;
+}
+
+function removePhoto(id,idx,btn){
+photoStore[id].splice(idx,1);
+btn.closest(’.photo-thumb’).remove();
+document.getElementById(‘thumbs-’+id).querySelectorAll(’.photo-remove’).forEach((b,i)=>{
+b.setAttribute(‘onclick’,`removePhoto('${id}',${i},this)`);
+});
+scheduleSave();
+}
+
+function duplicateSection(btn,sectionKey){
+duplicateCounts[sectionKey]++;
+const n=duplicateCounts[sectionKey];
+const label=sectionKey===‘chambre’?`Chambre ${n}`:`Salle de bain ${n}`;
+const icon=sectionKey===‘chambre’?‘🛏️’:‘🚿’;
+const items=SECTIONS_DATA[sectionKey]||[];
+const wrapper=document.createElement(‘div’);
+wrapper.className=‘section’;
+wrapper.dataset.section=sectionKey+’-’+n;
+wrapper.innerHTML=`<div class="section-header" onclick="toggleSection(this)">
+<span class="section-icon">${icon}</span>
+<span class="section-title">${label}</span>
+<button class="remove-duplicate-btn" onclick="removeDuplicate(this,event)">✕</button>
+<span class="section-chevron">▾</span>
+
+  </div>
+  <div class="section-body">${items.map(item=>renderItem(item)).join('')}</div>`;
+  btn.closest('.section').parentNode.insertBefore(wrapper,btn.closest('.section').nextSibling);
+  btn.closest('.section').querySelector('.section-title').textContent=sectionKey==='chambre'?'Chambre 1':'Salle de bain 1';
   scheduleSave();
 }
 
-function removeDuplicate(btn, e) {
-  e.stopPropagation();
-  const section = btn.closest('.section');
-  const key = section.dataset.section.split('-')[0];
-  duplicateCounts[key] = Math.max(1, duplicateCounts[key] - 1);
-  section.remove();
-  scheduleSave();
+function removeDuplicate(btn,e){
+e.stopPropagation();
+const section=btn.closest(’.section’);
+const key=section.dataset.section.split(’-’)[0];
+duplicateCounts[key]=Math.max(1,duplicateCounts[key]-1);
+section.remove();
+scheduleSave();
 }
 
-// ── TOGGLE ──
-function toggleSection(header) {
-  header.classList.toggle('collapsed');
-  const body = header.nextElementSibling;
-  if (body && body.classList.contains('section-body')) {
-    body.classList.toggle('collapsed');
-  }
+function toggleSection(header){
+header.classList.toggle(‘collapsed’);
+const body=header.nextElementSibling;
+if(body&&body.classList.contains(‘section-body’)) body.classList.toggle(‘collapsed’);
 }
 
-function toggleOption(el) {
-  el.classList.toggle('active');
-  const section = document.querySelector(`.section.optional[data-section="${el.dataset.section}"]`);
-  if (section) section.classList.toggle('visible');
-  scheduleSave();
+function toggleOption(el){
+el.classList.toggle(‘active’);
+const section=document.querySelector(`.section.optional[data-section="${el.dataset.section}"]`);
+if(section) section.classList.toggle(‘visible’);
+scheduleSave();
 }
 
-// ── DATA COLLECTION ──
-function collectData() {
-  const sections = [];
-  document.querySelectorAll('.section:not(.optional), .section.optional.visible').forEach(section => {
-    const title = section.querySelector('.section-title').textContent;
-    const icon = section.querySelector('.section-icon').textContent;
-    const items = [];
-    section.querySelectorAll('.item').forEach(item => {
-      const id = item.dataset.itemId;
-      const name = item.querySelector('.item-name').textContent;
-      const active = item.querySelector('.status-btn.active');
-      const comment = item.querySelector('.item-comment').value;
-      const photos = photoStore[id] || [];
-      if (active) {
-        const status = active.classList[1];
-        items.push({ name, status, comment, photos });
-      }
-    });
-    if (items.length > 0) sections.push({ title, icon, items });
-  });
-  return sections;
+function collectData(){
+const sections=[];
+document.querySelectorAll(’.section:not(.optional):not(.hidden-type), .section.optional.visible’).forEach(section=>{
+const title=section.querySelector(’.section-title’).textContent;
+const icon=section.querySelector(’.section-icon’).textContent;
+const items=[];
+section.querySelectorAll(’.item’).forEach(item=>{
+const id=item.dataset.itemId;
+const name=item.querySelector(’.item-name’).textContent;
+const active=item.querySelector(’.status-btn.active’);
+const comment=item.querySelector(’.item-comment’).value;
+const photos=photoStore[id]||[];
+if(active){
+const status=active.classList[1];
+items.push({name,status,comment,photos});
+}
+});
+if(items.length>0) sections.push({title,icon,items});
+});
+return sections;
 }
 
-// ── RECAP ──
-function showRecap() {
-  const proprietaire = document.getElementById('proprietaire').value || '—';
-  const adresse = document.getElementById('adresse').value || '—';
-  const date = document.getElementById('date').value || '—';
-  const typeBien = document.getElementById('type-bien').value || '—';
-  const etage = document.getElementById('etage').value || '—';
-  const observations = document.getElementById('observations').value;
-  const sections = collectData();
-  let counts = { bon:0, surveiller:0, traiter:0, absent:0 };
-  sections.forEach(s => s.items.forEach(i => counts[i.status]++));
+function showRecap(){
+const proprietaire=document.getElementById(‘proprietaire’).value||’—’;
+const adresse=document.getElementById(‘adresse’).value||’—’;
+const date=document.getElementById(‘date’).value||’—’;
+const typeBien=document.getElementById(‘type-bien’).value||’—’;
+const etage=document.getElementById(‘etage’).value||’—’;
+const observations=document.getElementById(‘observations’).value;
+const sections=collectData();
+let counts={bon:0,surveiller:0,traiter:0,absent:0};
+sections.forEach(s=>s.items.forEach(i=>counts[i.status]++));
 
-  document.getElementById('modal-body').innerHTML = `
-    <div class="recap-info">
-      <div class="recap-info-item"><strong>${proprietaire}</strong>Propriétaire</div>
-      <div class="recap-info-item"><strong>${date}</strong>Date</div>
-      <div class="recap-info-item"><strong>${adresse}</strong>Adresse</div>
-      <div class="recap-info-item"><strong>${typeBien} — ${etage}</strong>Type / Situation</div>
-    </div>
-    <div class="summary-counts">
-      <div class="count-chip chip-bon">${counts.bon}<span>Bon état</span></div>
-      <div class="count-chip chip-surveiller">${counts.surveiller}<span>Surveiller</span></div>
-      <div class="count-chip chip-traiter">${counts.traiter}<span>À traiter</span></div>
-      <div class="count-chip chip-absent">${counts.absent}<span>Absent</span></div>
-    </div>
-    ${sections.map(s => `
-      <div class="recap-section">
-        <div class="recap-section-title">${s.icon} ${s.title}</div>
-        ${s.items.map(i => `
-          <div class="recap-item">
-            <span class="recap-badge badge-${i.status}">${STATUS_LABELS[i.status]}</span>
-            <span>${i.name}</span>
-          </div>
-          ${i.comment ? `<div class="recap-item-comment">→ ${i.comment}</div>` : ''}
-          ${i.photos.length ? `<div class="recap-photos">${i.photos.map(p => `<img class="recap-photo-thumb" src="${p}">`).join('')}</div>` : ''}
-        `).join('')}
-      </div>`).join('')}
-    ${observations ? `<div class="recap-section"><div class="recap-section-title">📝 Observations générales</div><p style="font-size:0.82rem;color:var(--text);line-height:1.5">${observations}</p></div>` : ''}
-  `;
-  document.getElementById('modal').classList.add('visible');
+document.getElementById(‘modal-body’).innerHTML=` <div class="recap-info"> <div class="recap-info-item"><strong>${proprietaire}</strong>Propriétaire</div> <div class="recap-info-item"><strong>${date}</strong>Date</div> <div class="recap-info-item"><strong>${adresse}</strong>Adresse</div> <div class="recap-info-item"><strong>${typeBien} — ${etage}</strong>Type / Situation</div> </div> <div class="summary-counts"> <div class="count-chip chip-bon">${counts.bon}<span>Bon état</span></div> <div class="count-chip chip-surveiller">${counts.surveiller}<span>Surveiller</span></div> <div class="count-chip chip-traiter">${counts.traiter}<span>À traiter</span></div> <div class="count-chip chip-absent">${counts.absent}<span>Absent</span></div> </div> ${sections.map(s=>`
+<div class="recap-section">
+<div class="recap-section-title">${s.icon} ${s.title}</div>
+${s.items.filter(i=>i.status!==‘absent’).map(i=>` <div class="recap-item"> <span class="recap-badge badge-${i.status}">${STATUS_LABELS[i.status]}</span> <span>${i.name}</span> </div> ${i.comment?`<div class="recap-item-comment">→ ${i.comment}</div>`:''} ${i.photos.length?`<div class="recap-photos">${i.photos.map(p=>`<img class="recap-photo-thumb" src="${p}">`).join(’’)}</div>`:''} `).join(’’)}
+</div>`).join('')} ${observations?`<div class="recap-section"><div class="recap-section-title">📝 Observations générales</div><p style="font-size:0.82rem;color:var(--text);line-height:1.5">${observations}</p></div>`:''} `;
+document.getElementById(‘modal’).classList.add(‘visible’);
 }
 
-function closeModal() { document.getElementById('modal').classList.remove('visible'); }
+function closeModal(){document.getElementById(‘modal’).classList.remove(‘visible’);}
 
-// ── COPY ──
-function copyRecap() {
-  const proprietaire = document.getElementById('proprietaire').value || '—';
-  const adresse = document.getElementById('adresse').value || '—';
-  const date = document.getElementById('date').value || '—';
-  const typeBien = document.getElementById('type-bien').value || '—';
-  const etage = document.getElementById('etage').value || '';
-  const observations = document.getElementById('observations').value;
-  const sections = collectData();
-  let counts = { bon:0, surveiller:0, traiter:0, absent:0 };
-  sections.forEach(s => s.items.forEach(i => counts[i.status]++));
+function copyRecap(){
+const proprietaire=document.getElementById(‘proprietaire’).value||’—’;
+const adresse=document.getElementById(‘adresse’).value||’—’;
+const date=document.getElementById(‘date’).value||’—’;
+const typeBien=document.getElementById(‘type-bien’).value||’—’;
+const etage=document.getElementById(‘etage’).value||’’;
+const observations=document.getElementById(‘observations’).value;
+const sections=collectData();
+let counts={bon:0,surveiller:0,traiter:0,absent:0};
+sections.forEach(s=>s.items.forEach(i=>counts[i.status]++));
 
-  let text = `EUKLEIA — ÉTAT DES LIEUX & INVENTAIRE\n${'─'.repeat(40)}\n`;
-  text += `Propriétaire : ${proprietaire}\nAdresse      : ${adresse}${etage ? ` (${etage})` : ''}\nDate         : ${date}\nType de bien : ${typeBien}\n\n`;
-  text += `SYNTHÈSE : ✓ ${counts.bon} bon état  ⚠ ${counts.surveiller} à surveiller  ✗ ${counts.traiter} à traiter  — ${counts.absent} absent\n\n`;
-
-  sections.forEach(s => {
-    text += `${s.icon} ${s.title.toUpperCase()}\n`;
-    s.items.forEach(i => {
-      text += `  ${STATUS_LABELS[i.status]} — ${i.name}`;
-      if (i.comment) text += `\n    → ${i.comment}`;
-      if (i.photos.length) text += `\n    📷 ${i.photos.length} photo(s)`;
-      text += '\n';
-    });
-    text += '\n';
-  });
-
-  if (observations) text += `📝 OBSERVATIONS GÉNÉRALES\n${observations}\n\n`;
-  text += `${'─'.repeat(40)}\nEukleia Conciergerie — Deauville`;
-
-  navigator.clipboard.writeText(text).then(() => showToast('Rapport copié ✓'));
+let text=`EUKLEIA — ÉTAT DES LIEUX & INVENTAIRE\n${'─'.repeat(40)}\n`;
+text+=`Propriétaire : ${proprietaire}\nAdresse      : ${adresse}${etage?` (${etage})`:''}\nDate         : ${date}\nType de bien : ${typeBien}\n\n`;
+text+=`SYNTHÈSE : ✓ ${counts.bon} bon  ⚠ ${counts.surveiller} surveiller  ✗ ${counts.traiter} traiter\n\n`;
+sections.forEach(s=>{
+const visibleItems=s.items.filter(i=>i.status!==‘absent’);
+if(visibleItems.length===0) return;
+text+=`${s.icon} ${s.title.toUpperCase()}\n`;
+visibleItems.forEach(i=>{
+text+=`  ${STATUS_LABELS[i.status]} — ${i.name}`;
+if(i.comment) text+=`\n    → ${i.comment}`;
+if(i.photos.length) text+=`\n    📷 ${i.photos.length} photo(s)`;
+text+=’\n’;
+});
+text+=’\n’;
+});
+if(observations) text+=`📝 OBSERVATIONS GÉNÉRALES\n${observations}\n\n`;
+text+=`${'─'.repeat(40)}\nEukleia Conciergerie — Deauville`;
+navigator.clipboard.writeText(text).then(()=>showToast(‘Rapport copié ✓’));
 }
 
-// ── PDF ──
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const proprietaire = document.getElementById('proprietaire').value || '—';
-  const adresse = document.getElementById('adresse').value || '—';
-  const date = document.getElementById('date').value || '—';
-  const typeBien = document.getElementById('type-bien').value || '—';
-  const etage = document.getElementById('etage').value || '';
-  const observations = document.getElementById('observations').value;
-  const sections = collectData();
-  let counts = { bon:0, surveiller:0, traiter:0, absent:0 };
-  sections.forEach(s => s.items.forEach(i => counts[i.status]++));
+function exportPDF(){
+const{jsPDF}=window.jspdf;
+const doc=new jsPDF({orientation:‘portrait’,unit:‘mm’,format:‘a4’});
+const proprietaire=document.getElementById(‘proprietaire’).value||’—’;
+const adresse=document.getElementById(‘adresse’).value||’—’;
+const date=document.getElementById(‘date’).value||’—’;
+const typeBien=document.getElementById(‘type-bien’).value||’—’;
+const nbPieces=document.getElementById(‘nb-pieces’).value||’’;
+const etage=document.getElementById(‘etage’).value||’’;
+const observations=document.getElementById(‘observations’).value;
+const allSections=collectData();
 
-  const W = 210, margin = 15;
-  let y = 0;
+// Filtrer : exclure sections 100% absentes, exclure items absents
+const sections=allSections
+.map(s=>({…s,items:s.items.filter(i=>i.status!==‘absent’)}))
+.filter(s=>s.items.length>0);
 
-  const checkPage = (needed = 8) => { if (y + needed > 280) { doc.addPage(); y = 20; } };
+let counts={bon:0,surveiller:0,traiter:0,absent:0};
+allSections.forEach(s=>s.items.forEach(i=>counts[i.status]++));
 
-  // Header band
-  doc.setFillColor(26, 26, 24);
-  doc.rect(0, 0, W, 32, 'F');
-  doc.setFillColor(184, 152, 106);
-  doc.rect(0, 0, W, 0.8, 'F');
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(18);
-  doc.setTextColor(184, 152, 106);
-  doc.text('EUKLEIA', W/2, 13, { align: 'center' });
-  doc.setFontSize(7);
-  doc.setTextColor(120, 120, 110);
-  doc.text('CONCIERGERIE', W/2, 18, { align: 'center' });
-  doc.setFontSize(9);
-  doc.setTextColor(230, 220, 200);
-  doc.text('État des lieux & Inventaire', W/2, 25, { align: 'center' });
+const W=210,M=15;
+let y=0;
 
-  y = 40;
+const addFooter=()=>{
+doc.setFillColor(26,26,24);
+doc.rect(0,287,W,10,‘F’);
+doc.setFillColor(184,152,106);
+doc.rect(0,287,W,0.5,‘F’);
+doc.setTextColor(120,110,100);
+doc.setFont(‘helvetica’,‘normal’);
+doc.setFontSize(6);
+doc.text(‘Eukleia Conciergerie — Deauville’,W/2,293,{align:‘center’});
+};
 
-  // Info block
-  doc.setFillColor(245, 240, 232);
-  doc.roundedRect(margin, y, W - margin*2, 28, 2, 2, 'F');
-  doc.setFontSize(7); doc.setTextColor(184, 152, 106); doc.setFont('helvetica', 'bold');
-  doc.text('PROPRIÉTAIRE', margin+4, y+6);
-  doc.text('DATE', W/2+2, y+6);
-  doc.setTextColor(58, 58, 53); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-  doc.text(proprietaire, margin+4, y+12);
-  doc.text(date, W/2+2, y+12);
-  doc.setFontSize(7); doc.setTextColor(184, 152, 106); doc.setFont('helvetica', 'bold');
-  doc.text('ADRESSE', margin+4, y+19);
-  doc.text('TYPE / SITUATION', W/2+2, y+19);
-  doc.setTextColor(58, 58, 53); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
-  doc.text(adresse, margin+4, y+25);
-  doc.text(`${typeBien}${etage ? ' — '+etage : ''}`, W/2+2, y+25);
+const newPage=()=>{addFooter();doc.addPage();y=20;};
+const check=(n=8)=>{if(y+n>278) newPage();};
 
-  y += 34;
+// ── HEADER ──
+doc.setFillColor(26,26,24);
+doc.rect(0,0,W,32,‘F’);
+doc.setFillColor(184,152,106);
+doc.rect(0,0,W,0.8,‘F’);
+doc.setFont(‘helvetica’,‘normal’);
+doc.setFontSize(18);doc.setTextColor(184,152,106);
+doc.text(‘EUKLEIA’,W/2,13,{align:‘center’});
+doc.setFontSize(7);doc.setTextColor(120,120,110);
+doc.text(‘CONCIERGERIE’,W/2,18,{align:‘center’});
+doc.setFontSize(9);doc.setTextColor(230,220,200);
+doc.text(‘Etat des lieux & Inventaire’,W/2,25,{align:‘center’});
+y=40;
 
-  // Summary chips
-  const chipW = (W - margin*2 - 9) / 4;
-  const chips = [
-    { label: 'Bon état', count: counts.bon, r:74, g:124, b:89 },
-    { label: 'À surveiller', count: counts.surveiller, r:196, g:115, b:42 },
-    { label: 'À traiter', count: counts.traiter, r:176, g:64, b:64 },
-    { label: 'Absent', count: counts.absent, r:136, g:136, b:128 },
-  ];
-  chips.forEach((chip, i) => {
-    const x = margin + i * (chipW + 3);
-    doc.setFillColor(chip.r, chip.g, chip.b, 0.1);
-    doc.setFillColor(chip.r + 160, chip.g + 100, chip.b + 100);
-    doc.roundedRect(x, y, chipW, 14, 2, 2, 'F');
-    doc.setTextColor(chip.r, chip.g, chip.b);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
-    doc.text(String(chip.count), x + chipW/2, y + 8, { align: 'center' });
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6);
-    doc.text(chip.label.toUpperCase(), x + chipW/2, y + 12.5, { align: 'center' });
-  });
+// ── INFO BLOCK ──
+doc.setFillColor(245,240,232);
+doc.roundedRect(M,y,W-M*2,28,2,2,‘F’);
+doc.setFontSize(7);doc.setTextColor(184,152,106);doc.setFont(‘helvetica’,‘bold’);
+doc.text(‘PROPRIETAIRE’,M+4,y+6);
+doc.text(‘DATE’,W/2+2,y+6);
+doc.setTextColor(58,58,53);doc.setFont(‘helvetica’,‘normal’);doc.setFontSize(9);
+doc.text(proprietaire,M+4,y+12);
+doc.text(date,W/2+2,y+12);
+doc.setFontSize(7);doc.setTextColor(184,152,106);doc.setFont(‘helvetica’,‘bold’);
+doc.text(‘ADRESSE’,M+4,y+19);
+doc.text(‘TYPE / SITUATION’,W/2+2,y+19);
+doc.setTextColor(58,58,53);doc.setFont(‘helvetica’,‘normal’);doc.setFontSize(8);
+const adrLines=doc.splitTextToSize(adresse,W/2-M-8);
+doc.text(adrLines[0]||adresse,M+4,y+25);
+const situation=[typeBien,nbPieces,etage].filter(Boolean).join(’ — ’);
+doc.text(situation,W/2+2,y+25);
+y+=34;
 
-  y += 20;
+// ── CHIPS ──
+const cW=(W-M*2-9)/4;
+[{label:‘Bon etat’,count:counts.bon,r:74,g:124,b:89},{label:‘A surveiller’,count:counts.surveiller,r:196,g:115,b:42},{label:‘A traiter’,count:counts.traiter,r:176,g:64,b:64},{label:‘Absent’,count:counts.absent,r:136,g:136,b:128}]
+.forEach((c,i)=>{
+const x=M+i*(cW+3);
+doc.setFillColor(c.r+160,c.g+100,c.b+100);
+doc.roundedRect(x,y,cW,14,2,2,‘F’);
+doc.setTextColor(c.r,c.g,c.b);
+doc.setFont(‘helvetica’,‘bold’);doc.setFontSize(13);
+doc.text(String(c.count),x+cW/2,y+8,{align:‘center’});
+doc.setFont(‘helvetica’,‘normal’);doc.setFontSize(6);
+doc.text(c.label.toUpperCase(),x+cW/2,y+12.5,{align:‘center’});
+});
+y+=20;
 
-  // Sections
-  const statusColors = {
-    bon: [74,124,89], surveiller: [196,115,42], traiter: [176,64,64], absent: [136,136,128]
-  };
+const SC={bon:[74,124,89],surveiller:[196,115,42],traiter:[176,64,64]};
+const PW=38,PH=28,PG=3;
+const MAX_PER_ROW=Math.floor((W-M*2-26)/(PW+PG));
 
-  sections.forEach(section => {
-    checkPage(12);
-    // Section header
-    doc.setFillColor(26, 26, 24);
-    doc.roundedRect(margin, y, W - margin*2, 8, 1, 1, 'F');
-    doc.setTextColor(230, 220, 200); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
-    doc.text(`${section.title.toUpperCase()}`, margin + 4, y + 5.5);
-    y += 11;
+// ── SECTIONS ──
+sections.forEach(section=>{
+check(12);
+doc.setFillColor(26,26,24);
+doc.roundedRect(M,y,W-M*2,8,1,1,‘F’);
+doc.setTextColor(230,220,200);doc.setFont(‘helvetica’,‘bold’);doc.setFontSize(8);
+// Use only ASCII-safe text for section title
+const safeTitle=section.title.replace(/[^\x00-\x7F]/g,’ ‘).replace(/\s+/g,’ ’).trim();
+doc.text(safeTitle.toUpperCase(),M+4,y+5.5);
+y+=11;
 
-    section.items.forEach(item => {
-      checkPage(7);
-      const [r,g,b] = statusColors[item.status];
-      // status pill
-      doc.setFillColor(r+160, g+100, b+100);
-      doc.roundedRect(margin, y, 22, 5, 1, 1, 'F');
-      doc.setTextColor(r, g, b); doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5);
-      doc.text(STATUS_LABELS[item.status], margin + 11, y + 3.5, { align: 'center' });
-      // item name
-      doc.setTextColor(58, 58, 53); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
-      doc.text(item.name, margin + 25, y + 3.8);
-      y += 6.5;
-      if (item.comment) {
-        checkPage(5);
-        doc.setTextColor(120, 110, 100); doc.setFontSize(6.5); doc.setFont('helvetica', 'italic');
-        const lines = doc.splitTextToSize(`→ ${item.comment}`, W - margin*2 - 26);
-        doc.text(lines, margin + 25, y);
-        y += lines.length * 4.5;
-      }
-    });
-    y += 3;
-  });
+```
+section.items.forEach(item=>{
+  check(7);
+  const[r,g,b]=SC[item.status]||[136,136,128];
+  // Status pill
+  doc.setFillColor(r+160,g+100,b+100);
+  doc.roundedRect(M,y,24,5,1,1,'F');
+  doc.setTextColor(r,g,b);doc.setFont('helvetica','bold');doc.setFontSize(5.5);
+  const sl=item.status==='bon'?'BON ETAT':item.status==='surveiller'?'SURVEILLER':'A TRAITER';
+  doc.text(sl,M+12,y+3.5,{align:'center'});
+  // Item name - ASCII safe
+  const safeName=item.name.replace(/[^\x00-\x7F]/g,' ').replace(/\s+/g,' ').trim();
+  doc.setTextColor(58,58,53);doc.setFont('helvetica','normal');doc.setFontSize(7.5);
+  const nameLines=doc.splitTextToSize(safeName,W-M*2-28);
+  doc.text(nameLines,M+27,y+3.8);
+  y+=Math.max(6.5,nameLines.length*4.8);
 
-  if (observations) {
-    checkPage(15);
-    doc.setFillColor(26,26,24);
-    doc.roundedRect(margin, y, W - margin*2, 8, 1, 1, 'F');
-    doc.setTextColor(230,220,200); doc.setFont('helvetica','bold'); doc.setFontSize(8);
-    doc.text('OBSERVATIONS GÉNÉRALES', margin+4, y+5.5);
-    y += 11;
-    doc.setTextColor(58,58,53); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
-    const obsLines = doc.splitTextToSize(observations, W - margin*2 - 4);
-    obsLines.forEach(line => { checkPage(5); doc.text(line, margin+2, y); y += 5; });
+  if(item.comment){
+    check(5);
+    const safeComment=item.comment.replace(/[^\x00-\x7F]/g,' ').replace(/\s+/g,' ').trim();
+    doc.setTextColor(110,100,90);doc.setFontSize(6.5);doc.setFont('helvetica','italic');
+    const cLines=doc.splitTextToSize('-> '+safeComment,W-M*2-28);
+    doc.text(cLines,M+27,y);
+    y+=cLines.length*4.5;
   }
 
-  // Footer
-  doc.setFillColor(26,26,24);
-  doc.rect(0, 287, W, 10, 'F');
-  doc.setFillColor(184,152,106);
-  doc.rect(0, 287, W, 0.5, 'F');
-  doc.setTextColor(120,110,100); doc.setFont('helvetica','normal'); doc.setFontSize(6);
-  doc.text('Eukleia Conciergerie — Deauville', W/2, 293, { align: 'center' });
+  // Photos
+  if(item.photos&&item.photos.length>0){
+    const rows=Math.ceil(item.photos.length/MAX_PER_ROW);
+    check(rows*(PH+3)+2);
+    let px=M+27,py=y;
+    item.photos.forEach((dataUrl,idx)=>{
+      if(idx>0&&idx%MAX_PER_ROW===0){px=M+27;py+=PH+PG;check(PH+3);}
+      try{
+        const fmt=dataUrl.startsWith('data:image/png')?'PNG':'JPEG';
+        doc.addImage(dataUrl,fmt,px,py,PW,PH);
+        doc.setDrawColor(184,152,106);doc.setLineWidth(0.2);
+        doc.rect(px,py,PW,PH);
+      }catch(e){}
+      px+=PW+PG;
+    });
+    y=py+PH+3;
+  }
+});
+y+=4;
+```
 
-  const filename = `Eukleia_EdL_${proprietaire.replace(/\s/g,'_')}_${date || 'sans-date'}.pdf`;
-  doc.save(filename);
-  showToast('PDF généré ✓');
+});
+
+if(observations){
+check(15);
+doc.setFillColor(26,26,24);
+doc.roundedRect(M,y,W-M*2,8,1,1,‘F’);
+doc.setTextColor(230,220,200);doc.setFont(‘helvetica’,‘bold’);doc.setFontSize(8);
+doc.text(‘OBSERVATIONS GENERALES’,M+4,y+5.5);
+y+=11;
+doc.setTextColor(58,58,53);doc.setFont(‘helvetica’,‘normal’);doc.setFontSize(7.5);
+const safeObs=observations.replace(/[^\x00-\x7F]/g,’ ‘).replace(/\s+/g,’ ’).trim();
+const obsLines=doc.splitTextToSize(safeObs,W-M*2-4);
+obsLines.forEach(line=>{check(5);doc.text(line,M+2,y);y+=5;});
+}
+
+addFooter();
+const filename=`Eukleia_EdL_${proprietaire.replace(/\s/g,'_')}_${date||'sans-date'}.pdf`;
+doc.save(filename);
+showToast(‘PDF genere !’);
 }
 
 // ── SAVE / RESTORE ──
-function scheduleSave() {
-  setSaveState('saving');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveForm, 800);
+function scheduleSave(){
+setSaveState(‘saving’);
+clearTimeout(saveTimer);
+saveTimer=setTimeout(saveForm,800);
 }
 
-function setSaveState(state) {
-  const dot = document.getElementById('save-dot');
-  const label = document.getElementById('save-label');
-  dot.className = 'save-dot ' + state;
-  if (state === 'saving') label.textContent = 'Enregistrement…';
-  else if (state === 'saved') label.textContent = 'Brouillon sauvegardé';
-  else label.textContent = 'Brouillon non enregistré';
+function setSaveState(state){
+const dot=document.getElementById(‘save-dot’);
+const label=document.getElementById(‘save-label’);
+dot.className=’save-dot ’+state;
+label.textContent=state===‘saving’?‘Enregistrement…’:(state===‘saved’?‘Brouillon sauvegarde’:‘Brouillon non enregistre’);
 }
 
-function saveForm() {
-  try {
-    const data = {
-      proprietaire: document.getElementById('proprietaire').value,
-      adresse: document.getElementById('adresse').value,
-      date: document.getElementById('date').value,
-      typeBien: document.getElementById('type-bien').value,
-      reference: document.getElementById('reference').value,
-      etage: document.getElementById('etage').value,
-      observations: document.getElementById('observations').value,
-      items: [],
-      options: []
-    };
-    document.querySelectorAll('.item').forEach(item => {
-      const id = item.dataset.itemId;
-      const active = item.querySelector('.status-btn.active');
-      data.items.push({
-        id,
-        status: active ? active.classList[1] : null,
-        comment: item.querySelector('.item-comment').value
-      });
-    });
-    document.querySelectorAll('.option-toggle.active').forEach(el => data.options.push(el.dataset.section));
-    localStorage.setItem('eukleia_edl', JSON.stringify(data));
-    setSaveState('saved');
-  } catch(e) { setSaveState(''); }
+function saveForm(){
+try{
+const data={
+proprietaire:document.getElementById(‘proprietaire’).value,
+adresse:document.getElementById(‘adresse’).value,
+date:document.getElementById(‘date’).value,
+typeBien:document.getElementById(‘type-bien’).value,
+nbPieces:document.getElementById(‘nb-pieces’).value,
+reference:document.getElementById(‘reference’).value,
+etage:document.getElementById(‘etage’).value,
+observations:document.getElementById(‘observations’).value,
+items:[],options:[]
+};
+document.querySelectorAll(’.item’).forEach(item=>{
+const id=item.dataset.itemId;
+const active=item.querySelector(’.status-btn.active’);
+data.items.push({id,status:active?active.classList[1]:null,comment:item.querySelector(’.item-comment’).value});
+});
+document.querySelectorAll(’.option-toggle.active’).forEach(el=>data.options.push(el.dataset.section));
+localStorage.setItem(‘eukleia_edl’,JSON.stringify(data));
+setSaveState(‘saved’);
+}catch(e){setSaveState(’’);}
 }
 
-function restoreForm() {
-  try {
-    const raw = localStorage.getItem('eukleia_edl');
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    if (data.proprietaire) document.getElementById('proprietaire').value = data.proprietaire;
-    if (data.adresse) document.getElementById('adresse').value = data.adresse;
-    if (data.date) document.getElementById('date').value = data.date;
-    if (data.typeBien) document.getElementById('type-bien').value = data.typeBien;
-    if (data.reference) document.getElementById('reference').value = data.reference;
-    if (data.etage) document.getElementById('etage').value = data.etage;
-    if (data.observations) document.getElementById('observations').value = data.observations;
-    if (data.options) data.options.forEach(key => {
-      const toggle = document.querySelector(`.option-toggle[data-section="${key}"]`);
-      if (toggle) toggleOption(toggle);
-    });
-    if (data.items) {
-      data.items.forEach(saved => {
-        const item = document.querySelector(`[data-item-id="${saved.id}"]`);
-        if (!item || !saved.status) return;
-        const btn = item.querySelector(`.status-btn.${saved.status}`);
-        if (btn) setStatus(btn, saved.status);
-        if (saved.comment) item.querySelector('.item-comment').value = saved.comment;
-      });
-    }
-    setSaveState('saved');
-  } catch(e) {}
+function restoreForm(){
+try{
+const raw=localStorage.getItem(‘eukleia_edl’);
+if(!raw) return;
+const data=JSON.parse(raw);
+if(data.proprietaire) document.getElementById(‘proprietaire’).value=data.proprietaire;
+if(data.adresse) document.getElementById(‘adresse’).value=data.adresse;
+if(data.date) document.getElementById(‘date’).value=data.date;
+if(data.typeBien){document.getElementById(‘type-bien’).value=data.typeBien;onTypeBienChange();}
+if(data.nbPieces) document.getElementById(‘nb-pieces’).value=data.nbPieces;
+if(data.reference) document.getElementById(‘reference’).value=data.reference;
+if(data.etage) document.getElementById(‘etage’).value=data.etage;
+if(data.observations) document.getElementById(‘observations’).value=data.observations;
+if(data.options) data.options.forEach(key=>{
+const toggle=document.querySelector(`.option-toggle[data-section="${key}"]`);
+if(toggle) toggleOption(toggle);
+});
+if(data.items) data.items.forEach(saved=>{
+const item=document.querySelector(`[data-item-id="${saved.id}"]`);
+if(!item||!saved.status) return;
+const btn=item.querySelector(`.status-btn.${saved.status}`);
+if(btn) setStatus(btn,saved.status);
+if(saved.comment) item.querySelector(’.item-comment’).value=saved.comment;
+});
+setSaveState(‘saved’);
+}catch(e){}
 }
 
-function resetForm() {
-  if (!confirm('Réinitialiser le formulaire ? Toutes les données seront perdues.')) return;
-  localStorage.removeItem('eukleia_edl');
-  location.reload();
+function resetForm(){
+if(!confirm(‘Reinitialiser le formulaire ? Toutes les donnees seront perdues.’)) return;
+localStorage.removeItem(‘eukleia_edl’);
+location.reload();
 }
 
-// ── TOAST ──
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+function showToast(msg){
+const t=document.getElementById(‘toast’);
+t.textContent=msg;
+t.classList.add(‘show’);
+setTimeout(()=>t.classList.remove(‘show’),2500);
 }
 
-// ── INIT ──
-document.getElementById('date').valueAsDate = new Date();
+document.getElementById(‘date’).valueAsDate=new Date();
 initSections();
 restoreForm();
 </script>
+
 </body>
 </html>
